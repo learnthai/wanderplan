@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>WanderPlan</title>
+<!-- ── PWA / 加入主畫面 ── -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="WanderPlan">
+<meta name="theme-color" content="#fef5ee">
+<link rel="apple-touch-icon" href="https://duk.tw/TMTfv6.png">
+<link rel="icon" type="image/png" href="https://duk.tw/TMTfv6.png">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22WanderPlan%22%2C%22short_name%22%3A%22WanderPlan%22%2C%22description%22%3A%22%E6%97%85%E9%81%8A%E8%A1%8C%E7%A8%8B%E8%A6%8F%E5%8A%83%20App%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fef5ee%22%2C%22theme_color%22%3A%22%23fef5ee%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fduk.tw%2FTMTfv6.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
 <link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -328,6 +337,7 @@ body{font-family:var(--sans);color:var(--brown);max-width:390px;margin:0 auto;di
 input[type="date"]{width:100%;height:40px;border:1.5px solid rgba(180,130,70,.22);border-radius:10px;padding:0 8px;font-family:var(--sans);font-size:12px;color:var(--brown);background:rgba(255,255,255,.7);outline:none}
 input[type="date"]:focus{border-color:var(--orange)}
 .dpgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media (max-width:420px){.dpgrid{grid-template-columns:1fr}}
 .dplabel{font-family:var(--sans);font-size:10px;font-weight:700;color:var(--gray);margin-bottom:3px}
 .enote{font-family:var(--sans);font-size:10px;color:rgba(120,90,50,.5);margin-top:4px}
 .ebtns{display:flex;gap:8px;margin-top:18px}
@@ -837,12 +847,18 @@ async function loadWeather(id,city){
     let lat,lon;
     if(wxCache[city]){({lat,lon}=wxCache[city])}
     else{
-      const g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
+      const ctrl=new AbortController();
+      const timer=setTimeout(()=>ctrl.abort(),8000);
+      const g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,{signal:ctrl.signal});
+      clearTimeout(timer);
       const gd=await g.json();
       if(!gd.results?.[0])throw new Error('城市找不到');
       lat=gd.results[0].latitude;lon=gd.results[0].longitude;wxCache[city]={lat,lon};
     }
-    const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`);
+    const ctrl2=new AbortController();
+    const timer2=setTimeout(()=>ctrl2.abort(),8000);
+    const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`,{signal:ctrl2.signal});
+    clearTimeout(timer2);
     const wd=await w.json();
     const t=Math.round(wd.current.temperature_2m)+'°C',dc=wxCode(wd.current.weather_code);
     if(tEl)tEl.textContent=t;if(dEl)dEl.textContent=dc;
@@ -856,6 +872,11 @@ async function loadWeather(id,city){
       tEl.onclick=()=>loadWeather(id,city);
     }
     if(dEl)dEl.textContent='點擊重試';
+    // 10秒後自動重試一次
+    setTimeout(()=>{
+      if(document.getElementById('wx-temp-'+id)?.textContent==='⚠️')
+        loadWeather(id,city);
+    },10000);
   }
 }
 function wxCode(c){if(c===0)return'☀️ 晴天';if(c<=3)return'⛅ 多雲';if(c<=49)return'🌫️ 霧';if(c<=59)return'🌦️ 毛雨';if(c<=69)return'🌧️ 下雨';if(c<=79)return'🌨️ 雨夾雪';if(c<=84)return'🌦️ 陣雨';return'⛈️ 雷暴'}

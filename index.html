@@ -844,40 +844,61 @@ async function loadWeather(id,city){
   if(!city){if(tEl)tEl.textContent='–';return}
   if(tEl){tEl.textContent='…';tEl.style.cursor='default';tEl.onclick=null}
   try{
-    let lat,lon;
-    if(wxCache[city]){({lat,lon}=wxCache[city])}
-    else{
-      const ctrl=new AbortController();
-      const timer=setTimeout(()=>ctrl.abort(),8000);
-      const g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,{signal:ctrl.signal});
-      clearTimeout(timer);
-      const gd=await g.json();
-      if(!gd.results?.[0])throw new Error('城市找不到');
-      lat=gd.results[0].latitude;lon=gd.results[0].longitude;wxCache[city]={lat,lon};
-    }
-    const ctrl2=new AbortController();
-    const timer2=setTimeout(()=>ctrl2.abort(),8000);
-    const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`,{signal:ctrl2.signal});
-    clearTimeout(timer2);
-    const wd=await w.json();
-    const t=Math.round(wd.current.temperature_2m)+'°C',dc=wxCode(wd.current.weather_code);
-    if(tEl)tEl.textContent=t;if(dEl)dEl.textContent=dc;
+    // wttr.in：一個 fetch 直接拿城市天氣，不需要先查座標
+    const url=`https://wttr.in/${encodeURIComponent(city)}?format=j1`;
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),8000);
+    const res=await fetch(url,{signal:ctrl.signal});
+    clearTimeout(timer);
+    const data=await res.json();
+    const cur=data.current_condition?.[0];
+    if(!cur)throw new Error('no data');
+    const t=cur.temp_C+'°C';
+    const desc=wxCodeWttr(parseInt(cur.weatherCode));
+    wxCache[city]={t,desc};
+    if(tEl)tEl.textContent=t;
+    if(dEl)dEl.textContent=desc;
     if(id===curTrip){
       const dt=document.getElementById('detail-wx-temp'),dd=document.getElementById('detail-wx-desc');
-      if(dt)dt.textContent=t;if(dd)dd.textContent=dc;
+      if(dt)dt.textContent=t;if(dd)dd.textContent=desc;
     }
   }catch(e){
-    if(tEl){
-      tEl.textContent='⚠️';tEl.title='點擊重試';tEl.style.cursor='pointer';
-      tEl.onclick=()=>loadWeather(id,city);
+    // fallback：嘗試 open-meteo
+    try{
+      let lat,lon;
+      if(wxCache[city]?.lat){({lat,lon}=wxCache[city])}
+      else{
+        const g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
+        const gd=await g.json();
+        if(!gd.results?.[0])throw new Error('not found');
+        lat=gd.results[0].latitude;lon=gd.results[0].longitude;
+        wxCache[city]={...wxCache[city],lat,lon};
+      }
+      const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`);
+      const wd=await w.json();
+      const t=Math.round(wd.current.temperature_2m)+'°C',desc=wxCode(wd.current.weather_code);
+      if(tEl)tEl.textContent=t;if(dEl)dEl.textContent=desc;
+      if(id===curTrip){
+        const dt=document.getElementById('detail-wx-temp'),dd=document.getElementById('detail-wx-desc');
+        if(dt)dt.textContent=t;if(dd)dd.textContent=desc;
+      }
+    }catch(e2){
+      if(tEl){tEl.textContent='–';tEl.style.cursor='default';tEl.onclick=null}
+      if(dEl)dEl.textContent='';
+      setTimeout(()=>{if(document.getElementById('wx-temp-'+id)?.textContent==='–')loadWeather(id,city)},15000);
     }
-    if(dEl)dEl.textContent='點擊重試';
-    // 10秒後自動重試一次
-    setTimeout(()=>{
-      if(document.getElementById('wx-temp-'+id)?.textContent==='⚠️')
-        loadWeather(id,city);
-    },10000);
   }
+}
+function wxCodeWttr(c){
+  if(c===113)return'☀️ 晴天';
+  if([116,119].includes(c))return'⛅ 多雲';
+  if(c===122)return'☁️ 陰天';
+  if([143,248,260].includes(c))return'🌫️ 霧';
+  if([176,263,266,293,296].includes(c))return'🌦️ 小雨';
+  if([299,302,305,308,353,356].includes(c))return'🌧️ 下雨';
+  if([317,320,323,326,329,332,335,338,350,368,371,374,377].includes(c))return'🌨️ 雪';
+  if([200,386,389,392,395].includes(c))return'⛈️ 雷暴';
+  return'🌤 多雲';
 }
 function wxCode(c){if(c===0)return'☀️ 晴天';if(c<=3)return'⛅ 多雲';if(c<=49)return'🌫️ 霧';if(c<=59)return'🌦️ 毛雨';if(c<=69)return'🌧️ 下雨';if(c<=79)return'🌨️ 雨夾雪';if(c<=84)return'🌦️ 陣雨';return'⛈️ 雷暴'}
 loadWeather('bkk','Bangkok');loadWeather('vn','Hanoi');

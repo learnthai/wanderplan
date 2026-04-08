@@ -598,8 +598,9 @@ input[type="date"]:focus{border-color:var(--orange)}
     <div class="er"><div class="el">航空公司</div><input class="ei" id="f-airline" type="text" placeholder="台灣虎航…"></div>
     <div class="er"><div class="el">出發機場</div><select class="esel" id="f-dep-sel" onchange="toggleCustom('f-dep-sel','f-dep-custom')"><option value="">請選擇</option><optgroup label="台灣"><option>TPE 桃園</option><option>TSA 松山</option><option>KHH 高雄</option></optgroup><optgroup label="東南亞"><option>BKK 曼谷素萬那普</option><option>DMK 曼谷廊曼</option><option>HKT 普吉島</option><option>CNX 清邁</option><option>SGN 胡志明市</option><option>HAN 河內</option><option>DPS 峇里島</option><option>KUL 吉隆坡</option><option>SIN 新加坡樟宜</option><option>MNL 馬尼拉</option></optgroup><optgroup label="日本"><option>NRT 東京成田</option><option>HND 東京羽田</option><option>KIX 大阪關西</option><option>CTS 札幌新千歲</option><option>FUK 福岡</option><option>OKA 沖繩那霸</option></optgroup><optgroup label="韓國"><option>ICN 仁川</option><option>GMP 金浦</option><option>PUS 釜山金海</option></optgroup><optgroup label="其他"><option>HKG 香港</option><option>PEK 北京首都</option><option>PVG 上海浦東</option></optgroup><option value="__custom__">✏️ 自行輸入</option></select><input class="ei" id="f-dep-custom" type="text" placeholder="機場代碼" style="display:none;margin-top:6px"></div>
     <div class="er"><div class="el">抵達機場</div><select class="esel" id="f-arr-sel" onchange="toggleCustom('f-arr-sel','f-arr-custom')"><option value="">請選擇</option><optgroup label="台灣"><option>TPE 桃園</option><option>TSA 松山</option><option>KHH 高雄</option></optgroup><optgroup label="東南亞"><option>BKK 曼谷素萬那普</option><option>DMK 曼谷廊曼</option><option>HKT 普吉島</option><option>CNX 清邁</option><option>SGN 胡志明市</option><option>HAN 河內</option><option>DPS 峇里島</option><option>KUL 吉隆坡</option><option>SIN 新加坡樟宜</option><option>MNL 馬尼拉</option></optgroup><optgroup label="日本"><option>NRT 東京成田</option><option>HND 東京羽田</option><option>KIX 大阪關西</option><option>CTS 札幌新千歲</option><option>FUK 福岡</option><option>OKA 沖繩那霸</option></optgroup><optgroup label="韓國"><option>ICN 仁川</option><option>GMP 金浦</option><option>PUS 釜山金海</option></optgroup><optgroup label="其他"><option>HKG 香港</option><option>PEK 北京首都</option><option>PVG 上海浦東</option></optgroup><option value="__custom__">✏️ 自行輸入</option></select><input class="ei" id="f-arr-custom" type="text" placeholder="機場代碼" style="display:none;margin-top:6px"></div>
-    <div class="dpgrid"><div><div class="dplabel">起飛</div><input class="ei" id="f-dep-t" type="text" placeholder="16:40"></div><div><div class="dplabel">降落</div><input class="ei" id="f-arr-t" type="text" placeholder="19:30"></div></div>
-    <div class="dpgrid"><div><div class="dplabel">日期</div><input type="date" id="f-date"></div><div><div class="dplabel">航廈</div><input class="ei" id="f-terminal" type="text" placeholder="T1"></div></div>
+    <div class="dpgrid"><div><div class="dplabel">起飛時間</div><input class="ei" id="f-dep-t" type="text" placeholder="16:40"></div><div><div class="dplabel">降落時間</div><input class="ei" id="f-arr-t" type="text" placeholder="19:30"></div></div>
+    <div class="dpgrid"><div><div class="dplabel">出發航廈</div><input class="ei" id="f-dep-terminal" type="text" placeholder="T1"></div><div><div class="dplabel">抵達航廈</div><input class="ei" id="f-arr-terminal" type="text" placeholder="T2"></div></div>
+    <div class="er"><div class="dplabel">日期</div><input type="date" id="f-date"></div>
     <div class="er"><div class="el">電子機票連結</div><input class="ei" id="f-ticket" type="text" placeholder="https://..."></div>
     <div class="ebtns"><button class="btn btn-primary" style="height:44px;font-size:14px" onclick="saveFlight()">儲存</button><button class="btn btn-secondary" style="height:44px;font-size:14px;flex:none;padding:0 20px" onclick="closeSheet('flightOverlay')">取消</button></div>
   </div>
@@ -972,7 +973,7 @@ function syncCFP(id){
   const fl=flightData[id]||[],dep=fl.find(f=>f.dir==='dep'),ret=fl.find(f=>f.dir==='ret');
   if(!dep&&!ret){cfp.style.display='none';return}
   cfp.style.display='flex';
-  cfp.innerHTML=[dep?`<div class="cfp-row"><span class="cfp-badge dep">去程</span><div class="cfp-info"><div class="cfp-route">${dep.from} → ${dep.to}${dep.terminal?' ('+dep.terminal+')':''}</div><div class="cfp-sub">${dep.airline||''}${dep.airline&&dep.date?' · ':''}${fmtShortNw(dep.date)}</div></div><div class="cfp-right"><div class="cfp-time">${dep.depT}${dep.arrT?' – '+dep.arrT:''}</div></div></div>`:null,dep&&ret?'<div class="cfp-divider"></div>':null,ret?`<div class="cfp-row"><span class="cfp-badge ret">回程</span><div class="cfp-info"><div class="cfp-route">${ret.from} → ${ret.to}${ret.terminal?' ('+ret.terminal+')':''}</div><div class="cfp-sub">${ret.airline||''}${ret.airline&&ret.date?' · ':''}${fmtShortNw(ret.date)}</div></div><div class="cfp-right"><div class="cfp-time">${ret.depT}${ret.arrT?' – '+ret.arrT:''}</div></div></div>`:null].filter(Boolean).join('');
+  cfp.innerHTML=[dep?`<div class="cfp-row"><span class="cfp-badge dep">去程</span><div class="cfp-info"><div class="cfp-route">${dep.from}${dep.depTerminal?' ('+dep.depTerminal+')':''} → ${dep.to}${dep.arrTerminal?' ('+dep.arrTerminal+')':''}</div><div class="cfp-sub">${dep.airline||''}${dep.airline&&dep.date?' · ':''}${fmtShortNw(dep.date)}</div></div><div class="cfp-right"><div class="cfp-time">${dep.depT}${dep.arrT?' – '+dep.arrT:''}</div></div></div>`:null,dep&&ret?'<div class="cfp-divider"></div>':null,ret?`<div class="cfp-row"><span class="cfp-badge ret">回程</span><div class="cfp-info"><div class="cfp-route">${ret.from}${ret.depTerminal?' ('+ret.depTerminal+')':''} → ${ret.to}${ret.arrTerminal?' ('+ret.arrTerminal+')':''}</div><div class="cfp-sub">${ret.airline||''}${ret.airline&&ret.date?' · ':''}${fmtShortNw(ret.date)}</div></div><div class="cfp-right"><div class="cfp-time">${ret.depT}${ret.arrT?' – '+ret.arrT:''}</div></div></div>`:null].filter(Boolean).join('');
 }
 
 /* ── 航班 ── */
@@ -980,12 +981,45 @@ function renderFlightList(){
   const el=document.getElementById('flight-list');if(!el)return;
   const items=flightData[curTrip]||[];
   if(!items.length){el.innerHTML=`<div class="list-empty">尚無航班資訊</div>`;syncCFP(curTrip);return}
-  el.innerHTML=items.map((f,i)=>`<div class="flight-item"><span class="flight-badge${f.dir==='ret'?' ret':''}">${f.dir==='ret'?'回程':'去程'}</span><div class="flight-mid"><div class="flight-route-text">${f.from} <span class="flight-arrow">→</span> ${f.to}${f.terminal?` <span class="flight-terminal-tag">${f.terminal}</span>`:''}</div>${f.airline?`<div class="flight-airline">${f.airline}</div>`:''}${f.ticket?`<a href="${f.ticket}" target="_blank" style="font-family:var(--sans);font-size:10px;color:var(--purple);text-decoration:underline">📄 電子機票</a>`:''}</div><div class="flight-right"><div class="flight-time-text">${f.depT}${f.arrT?' – '+f.arrT:''}</div><div class="flight-date-text">${fmtShort(f.date)}</div><div style="display:flex;gap:2px"><button class="icon-btn" onclick="openFlightEdit(${i})">${SVG_EDIT}</button><button class="icon-btn del" onclick="deleteFlight(${i})">${SVG_TRASH}</button></div></div></div>`).join('');
+  el.innerHTML=items.map((f,i)=>`<div class="flight-item"><span class="flight-badge${f.dir==='ret'?' ret':''}">${f.dir==='ret'?'回程':'去程'}</span><div class="flight-mid"><div class="flight-route-text">${f.from}${f.depTerminal?` <span class="flight-terminal-tag">${f.depTerminal}</span>`:''} <span class="flight-arrow">→</span> ${f.to}${f.arrTerminal?` <span class="flight-terminal-tag">${f.arrTerminal}</span>`:''}</div>${f.airline?`<div class="flight-airline">${f.airline}</div>`:''}${f.ticket?`<a href="${f.ticket}" target="_blank" style="font-family:var(--sans);font-size:10px;color:var(--purple);text-decoration:underline">📄 電子機票</a>`:''}</div><div class="flight-right"><div class="flight-time-text">${f.depT}${f.arrT?' – '+f.arrT:''}</div><div class="flight-date-text">${fmtShort(f.date)}</div><div style="display:flex;gap:2px"><button class="icon-btn" onclick="openFlightEdit(${i})">${SVG_EDIT}</button><button class="icon-btn del" onclick="deleteFlight(${i})">${SVG_TRASH}</button></div></div></div>`).join('');
   syncCFP(curTrip);updateProgress(curTrip);
 }
 let editFlightIdx=-1;
-function openFlightEdit(idx){editFlightIdx=idx;const f=idx>=0?(flightData[curTrip]||[])[idx]:null;document.getElementById('flight-sheet-title').textContent=idx>=0?'✈️ 編輯航班':'✈️ 新增航班';document.getElementById('f-direction').value=f?.dir||'dep';document.getElementById('f-airline').value=f?.airline||'';setSelOrCustom('f-dep-sel','f-dep-custom',f?.from||'');setSelOrCustom('f-arr-sel','f-arr-custom',f?.to||'');document.getElementById('f-dep-t').value=f?.depT||'';document.getElementById('f-arr-t').value=f?.arrT||'';document.getElementById('f-date').value=f?.date||'';document.getElementById('f-terminal').value=f?.terminal||'';document.getElementById('f-ticket').value=f?.ticket||'';openSheet('flightOverlay')}
-function saveFlight(){const dep=getSelOrCustom('f-dep-sel','f-dep-custom').split(' ')[0],arr=getSelOrCustom('f-arr-sel','f-arr-custom').split(' ')[0];const obj={dir:document.getElementById('f-direction').value,airline:document.getElementById('f-airline').value.trim(),from:dep,to:arr,depT:document.getElementById('f-dep-t').value.trim(),arrT:document.getElementById('f-arr-t').value.trim(),date:document.getElementById('f-date').value,terminal:document.getElementById('f-terminal').value.trim(),ticket:document.getElementById('f-ticket').value.trim()};if(!flightData[curTrip])flightData[curTrip]=[];if(editFlightIdx>=0)flightData[curTrip][editFlightIdx]=obj;else flightData[curTrip].push(obj);renderFlightList();closeSheet('flightOverlay');save()}
+function openFlightEdit(idx){
+  editFlightIdx=idx;
+  const f=idx>=0?(flightData[curTrip]||[])[idx]:null;
+  document.getElementById('flight-sheet-title').textContent=idx>=0?'✈️ 編輯航班':'✈️ 新增航班';
+  document.getElementById('f-direction').value=f?.dir||'dep';
+  document.getElementById('f-airline').value=f?.airline||'';
+  setSelOrCustom('f-dep-sel','f-dep-custom',f?.from||'');
+  setSelOrCustom('f-arr-sel','f-arr-custom',f?.to||'');
+  document.getElementById('f-dep-t').value=f?.depT||'';
+  document.getElementById('f-arr-t').value=f?.arrT||'';
+  document.getElementById('f-date').value=f?.date||'';
+  document.getElementById('f-dep-terminal').value=f?.depTerminal||f?.terminal||'';
+  document.getElementById('f-arr-terminal').value=f?.arrTerminal||'';
+  document.getElementById('f-ticket').value=f?.ticket||'';
+  openSheet('flightOverlay');
+}
+function saveFlight(){
+  const dep=getSelOrCustom('f-dep-sel','f-dep-custom').split(' ')[0];
+  const arr=getSelOrCustom('f-arr-sel','f-arr-custom').split(' ')[0];
+  const obj={
+    dir:document.getElementById('f-direction').value,
+    airline:document.getElementById('f-airline').value.trim(),
+    from:dep,to:arr,
+    depT:document.getElementById('f-dep-t').value.trim(),
+    arrT:document.getElementById('f-arr-t').value.trim(),
+    date:document.getElementById('f-date').value,
+    depTerminal:document.getElementById('f-dep-terminal').value.trim(),
+    arrTerminal:document.getElementById('f-arr-terminal').value.trim(),
+    ticket:document.getElementById('f-ticket').value.trim()
+  };
+  if(!flightData[curTrip])flightData[curTrip]=[];
+  if(editFlightIdx>=0)flightData[curTrip][editFlightIdx]=obj;
+  else flightData[curTrip].push(obj);
+  renderFlightList();closeSheet('flightOverlay');save();
+}
 function deleteFlight(i){flightData[curTrip]?.splice(i,1);renderFlightList();save()}
 
 /* ── 住宿 ── */

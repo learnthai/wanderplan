@@ -227,7 +227,7 @@ body{font-family:var(--sans);color:var(--brown);max-width:390px;margin:0 auto;di
 .buy-cat-count{font-family:var(--sans);font-size:10px;color:var(--gray)}
 .buy-cat-body{background:rgba(255,248,235,.5);border-radius:12px;padding:2px 12px}
 .add-cat-btn{width:100%;height:36px;border:1.5px dashed rgba(180,130,60,.22);border-radius:10px;background:transparent;font-family:var(--sans);font-size:12px;color:rgba(140,85,35,.48);cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:4px}
-.gift-person{background:rgba(255,248,235,.6);border:1px solid rgba(180,130,60,.12);border-radius:12px;padding:12px;margin-bottom:10px}
+.gift-person{background:rgba(255,248,235,.6);border:1px solid rgba(180,130,60,.12);border-radius:12px;padding:12px;margin-bottom:10px;overflow:hidden}
 .gift-person-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .gift-person-name{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--brown);flex:1}
 .gift-add-person-btn{width:100%;height:38px;border:1.5px dashed rgba(180,130,60,.22);border-radius:10px;background:transparent;font-family:var(--sans);font-size:12px;color:rgba(140,85,35,.48);cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:4px}
@@ -428,7 +428,7 @@ input[type="date"]:focus{border-color:var(--orange)}
         <div class="trip-card" id="home-card-bkk">
           <button class="card-del-btn" onclick="deleteTrip('bkk')"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="#c0b0a0" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 12,4"/><path d="M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1"/><rect x="3" y="4" width="8" height="8" rx="1"/><line x1="5.5" y1="7" x2="5.5" y2="10"/><line x1="8.5" y1="7" x2="8.5" y2="10"/></svg></button>
           <div class="card-inner"><div class="card-header cc0" onclick="goDetail('bkk')"><div class="deco1"></div><div class="deco2"></div><div style="position:relative;z-index:1"><div class="card-country" id="country-bkk">🇹🇭 THAILAND</div><div class="card-city" id="city-bkk">Bangkok</div></div><div class="card-weather"><div class="weather-temp" id="wx-temp-bkk">–</div><div class="weather-desc" id="wx-desc-bkk">載入中</div></div></div>
-          <div class="card-body"><div class="card-date" id="date-bkk">📅 2026年5月22日（五）— 2026年5月25日（一）</div><div class="card-desc" id="desc-bkk">泰國曼谷文化美食之旅</div><div class="cfp" id="cfp-bkk"></div><div class="progress-row"><div class="progress-bar"><div class="progress-fill cc0" id="prog-bkk" style="width:30%"></div></div><div class="progress-pct cc0" id="pct-bkk">30%</div></div><div class="card-actions"><button class="btn btn-cc0" onclick="goDetail('bkk')">📋 查看行程</button><button class="btn btn-secondary" onclick="goBudget('bkk')">💰 記帳</button><button class="btn btn-maps" onclick="window.open('https://www.google.com/maps/search/Bangkok','_blank')">🗺️</button></div></div></div>
+          <div class="card-body"><div class="card-date" id="date-bkk">📅 2026年5月22日（五）— 2026年5月25日（一）</div><div class="card-desc" id="desc-bkk">快閃曼谷</div><div class="cfp" id="cfp-bkk"></div><div class="progress-row"><div class="progress-bar"><div class="progress-fill cc0" id="prog-bkk" style="width:30%"></div></div><div class="progress-pct cc0" id="pct-bkk">30%</div></div><div class="card-actions"><button class="btn btn-cc0" onclick="goDetail('bkk')">📋 查看行程</button><button class="btn btn-secondary" onclick="goBudget('bkk')">💰 記帳</button><button class="btn btn-maps" onclick="window.open('https://www.google.com/maps/search/Bangkok','_blank')">🗺️</button></div></div></div>
         </div>
         <div class="trip-card" id="home-card-vn">
           <button class="card-del-btn" onclick="deleteTrip('vn')"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="#c0b0a0" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 12,4"/><path d="M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1"/><rect x="3" y="4" width="8" height="8" rx="1"/><line x1="5.5" y1="7" x2="5.5" y2="10"/><line x1="8.5" y1="7" x2="8.5" y2="10"/></svg></button>
@@ -687,12 +687,12 @@ const EXCHANGE_RATES={THB:33.5,VND:24500,IDR:15800,MYR:4.75,SGD:1.35,JPY:150,KRW
 /* ══ Data ══ */
 const ccMap={bkk:'cc0',vn:'cc1'};
 const imgMap={bkk:'',vn:''};
-const tripBudget={bkk:'฿45,000',vn:''};
-const tripCurrency={bkk:'泰銖 THB',vn:''};
-const tripBudgetRaw={bkk:45000,vn:0};
+const tripBudget={bkk:'NT$12,000',vn:''};
+const tripCurrency={bkk:'NT$ 台幣 TWD',vn:''};
+const tripBudgetRaw={bkk:12000,vn:0};
 let curTrip='bkk',curDay=0,ccIdx=2,curListTrip='bkk',curBudgetTrip='bkk',curBudgetDate=null;
 const tripDates={bkk:{start:'2026-05-22',end:'2026-05-25'},vn:{start:'2025-09-01',end:'2025-09-10'}};
-const flightData={bkk:[{dir:'dep',airline:'台灣虎航',from:'TPE',to:'DMK',depT:'16:40',arrT:'19:30',date:'2026-05-22',terminal:'T1',ticket:''},{dir:'ret',airline:'台灣虎航',from:'DMK',to:'TPE',depT:'03:00',arrT:'07:55',date:'2026-05-25',terminal:'T2',ticket:''}],vn:[]};
+const flightData={bkk:[{dir:'dep',airline:'泰獅航',from:'TPE',to:'DMK',depT:'16:40',arrT:'19:30',date:'2026-05-22',depTerminal:'T1',arrTerminal:'T1',ticket:''},{dir:'ret',airline:'泰獅航',from:'DMK',to:'TPE',depT:'03:00',arrT:'07:55',date:'2026-05-25',depTerminal:'T1',arrTerminal:'T1',ticket:''}],vn:[]};
 const hostelData={bkk:[{name:'Kinnon Hostel',checkin:'2026-05-22',checkout:'2026-05-24',note:'MRT S2 Sala Daeng 站步行5分鐘'}],vn:[]};
 const defaultPrep=['化妝品、保養品','卸妝','牙刷、牙膏','耳塞','乳液','小剪刀','燙睫毛器','烘罩','橡皮筋','內褲','襪子','胸貼 NU bra','上衣、褲子','睡衣','項鍊、耳環','過敏藥、眼藥水','保健食品盒、酵素','充電、隨充、線、插頭','護照','自拍架','網路卡、影印紙','衛生紙、濕紙巾','飲料背帶','OK繃','雨傘','購物袋','消臭石','牙籤'];
 const listData={
@@ -1229,11 +1229,12 @@ function renderBudgetDayList(){
     return;
   }
   const dayTotal=exps.reduce((s,e)=>s+e.amt,0);
-  el.innerHTML=exps.map(e=>{const ci=catInfo(e.cat);return`<div class="expense-item"><div class="expense-cat-icon" style="background:${ci.color}22">${ci.icon}</div><div class="expense-mid"><div class="expense-name">${e.name}</div><div class="expense-meta"><span class="expense-pay-badge">${e.pay}</span>${e.note?`<span class="expense-sub">${e.note}</span>`:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span class="expense-amt">${sym}${numFmt(e.amt)}</span><button class="icon-btn del" onclick="deleteExpense('${id}',${e.id})">${SVG_TRASH_SM}</button></div></div>`}).join('')+`<div class="expense-day-total-row"><span class="expense-day-total-label">當日合計</span><span class="expense-day-total-amt">${sym}${numFmt(dayTotal)}</span></div>`;
+  el.innerHTML=exps.map(e=>{const ci=catInfo(e.cat);return`<div class="expense-item"><div class="expense-cat-icon" style="background:${ci.color}22">${ci.icon}</div><div class="expense-mid"><div class="expense-name">${e.name}</div><div class="expense-meta"><span class="expense-pay-badge">${e.pay}</span>${e.note?`<span class="expense-sub">${e.note}</span>`:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span class="expense-amt">${sym}${numFmt(e.amt)}</span><button class="icon-btn" onclick="openEditExpense('${id}',${e.id})">${SVG_EDIT}</button><button class="icon-btn del" onclick="deleteExpense('${id}',${e.id})">${SVG_TRASH_SM}</button></div></div>`}).join('')+`<div class="expense-day-total-row"><span class="expense-day-total-label">當日合計</span><span class="expense-day-total-amt">${sym}${numFmt(dayTotal)}</span></div>`;
 }
 function deleteExpense(id,eid){expenseData[id]=(expenseData[id]||[]).filter(e=>e.id!==eid);renderBudgetContent();if(curTrip===id)updateDetailBudget(id);save()}
 
 function openExpenseSheet(){
+  editExpenseId=null;
   document.getElementById('exp-cat-chips').innerHTML=CATS.map((c,i)=>`<div class="cat-chip${i===0?' active':''}" data-cat="${c.name}" onclick="selectCat(this)" style="${i===0?'background:'+c.color+';color:white;border-color:transparent':''}">${c.icon} ${c.name}</div>`).join('');
   document.getElementById('custom-cat-row').style.display='none';
   document.getElementById('custom-cat-input').value='';
@@ -1244,6 +1245,22 @@ function openExpenseSheet(){
 }
 function selectCat(el){document.querySelectorAll('.cat-chip').forEach(c=>{c.classList.remove('active');c.style.cssText=''});el.classList.add('active');const ci=catInfo(el.dataset.cat);el.style.background=ci.color;el.style.color='white';el.style.borderColor='transparent';document.getElementById('custom-cat-row').style.display=el.dataset.cat==='自訂'?'block':'none'}
 function selectPay(el){document.querySelectorAll('#pay-chips-wrap .pay-chip').forEach(p=>p.classList.remove('active'));el.classList.add('active')}
+let editExpenseId=null;
+function openEditExpense(tripId,eid){
+  const e=(expenseData[tripId]||[]).find(x=>x.id===eid);if(!e)return;
+  editExpenseId=eid;
+  // 填入現有資料
+  document.getElementById('exp-cat-chips').innerHTML=CATS.map((c,i)=>{const active=c.name===e.cat;return`<div class="cat-chip${active?' active':''}" data-cat="${c.name}" onclick="selectCat(this)" style="${active?'background:'+c.color+';color:white;border-color:transparent':''}">${c.icon} ${c.name}</div>`}).join('');
+  const isCustom=!CATS.find(c=>c.name===e.cat);
+  document.getElementById('custom-cat-row').style.display=isCustom?'block':'none';
+  document.getElementById('custom-cat-input').value=isCustom?e.cat:'';
+  document.getElementById('exp-name').value=e.name;
+  document.getElementById('exp-amount').value=e.amt;
+  document.getElementById('exp-note').value=e.note||'';
+  document.getElementById('exp-date').value=e.date||'';
+  document.querySelectorAll('#pay-chips-wrap .pay-chip').forEach(p=>p.classList.toggle('active',p.dataset.pay===e.pay));
+  openSheet('expenseOverlay');
+}
 function saveExpense(){
   const amt=parseFloat(document.getElementById('exp-amount').value);if(!amt||amt<=0)return;
   let cat=document.querySelector('.cat-chip.active')?.dataset.cat||'其他';
@@ -1253,8 +1270,17 @@ function saveExpense(){
   const note=document.getElementById('exp-note').value.trim();
   const date=document.getElementById('exp-date').value||new Date().toISOString().slice(0,10);
   if(!expenseData[curBudgetTrip])expenseData[curBudgetTrip]=[];
-  expenseData[curBudgetTrip].push({id:++expenseIdSeq,cat,name,amt,pay,note,date});
-  curBudgetDate=date;closeSheet('expenseOverlay');renderBudgetContent();
+  if(editExpenseId!=null){
+    // 編輯模式
+    const idx=expenseData[curBudgetTrip].findIndex(e=>e.id===editExpenseId);
+    if(idx>=0)expenseData[curBudgetTrip][idx]={...expenseData[curBudgetTrip][idx],cat,name,amt,pay,note,date};
+    editExpenseId=null;
+  } else {
+    // 新增模式
+    expenseData[curBudgetTrip].push({id:++expenseIdSeq,cat,name,amt,pay,note,date});
+    curBudgetDate=date;
+  }
+  closeSheet('expenseOverlay');renderBudgetContent();
   if(curTrip===curBudgetTrip)updateDetailBudget(curBudgetTrip);save();
 }
 

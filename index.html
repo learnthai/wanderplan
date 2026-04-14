@@ -227,8 +227,10 @@ body{font-family:var(--sans);color:var(--brown);max-width:390px;margin:0 auto;di
 .buy-cat-count{font-family:var(--sans);font-size:10px;color:var(--gray)}
 .buy-cat-body{background:rgba(255,248,235,.5);border-radius:12px;padding:2px 12px}
 .add-cat-btn{width:100%;height:36px;border:1.5px dashed rgba(180,130,60,.22);border-radius:10px;background:transparent;font-family:var(--sans);font-size:12px;color:rgba(140,85,35,.48);cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:4px}
-.gift-person{background:rgba(255,248,235,.6);border:1px solid rgba(180,130,60,.12);border-radius:12px;padding:12px 12px 14px;margin-bottom:10px;overflow:visible}
-.gift-add-row{display:flex;gap:8px;margin-top:8px;padding-right:2px}
+.gift-person{background:rgba(255,248,235,.6);border:1px solid rgba(180,130,60,.12);border-radius:12px;padding:12px;margin-bottom:10px;box-sizing:border-box;width:100%}
+.gift-add-row{display:flex;gap:6px;margin-top:8px;width:100%;box-sizing:border-box}
+.gift-add-row .cl-add-input{flex:1;min-width:0}
+.gift-add-row .cl-add-btn{flex-shrink:0;width:38px;padding:0;border-radius:10px}
 .gift-person-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .gift-person-name{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--brown);flex:1}
 .gift-add-person-btn{width:100%;height:38px;border:1.5px dashed rgba(180,130,60,.22);border-radius:10px;background:transparent;font-family:var(--sans);font-size:12px;color:rgba(140,85,35,.48);cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:4px}
@@ -1372,7 +1374,7 @@ function renderGiftList(){
   const el=document.getElementById('gift-persons');if(!el)return;
   const gifts=(listData[curListTrip]?.gifts)||[];
   if(!gifts.length){el.innerHTML='';return}
-  el.innerHTML=gifts.map((g,gi)=>`<div class="gift-person"><div class="gift-person-header"><div class="gift-person-name">🎁 ${g.name}</div><button class="icon-btn del" onclick="deleteGiftPerson(${gi})">${SVG_TRASH_SM}</button></div>${g.items.map((it,ii)=>`<div class="cl-item" style="padding:7px 0"><div class="cl-check${it.done?' done':''}" onclick="toggleGiftItem(${gi},${ii})"></div><div class="cl-content"><div class="cl-name${it.done?' done':''}">${it.name}</div></div><button class="icon-btn" onclick="openEditGiftItem(${gi},${ii})">${SVG_EDIT}</button><button class="icon-btn del" onclick="deleteGiftItem(${gi},${ii})">${SVG_TRASH_SM}</button></div>`).join('')}<div class="gift-add-row"><input class="cl-add-input" id="gift-inp-${gi}" type="text" placeholder="新增禮物…" onkeydown="if(event.key==='Enter')addGiftItem(${gi})"><button class="cl-add-btn" onclick="addGiftItem(${gi})">＋</button></div></div>`).join('');
+  el.innerHTML=gifts.map((g,gi)=>`<div class="gift-person"><div class="gift-person-header"><div class="gift-person-name">🎁 ${g.name}</div><button class="icon-btn del" onclick="deleteGiftPerson(${gi})">${SVG_TRASH_SM}</button></div>${g.items.map((it,ii)=>`<div class="cl-item" style="padding:7px 0"><div class="cl-check${it.done?' done':''}" onclick="toggleGiftItem(${gi},${ii})"></div><div class="cl-content"><div class="cl-name${it.done?' done':''}">${it.name}</div></div><button class="icon-btn" onclick="openEditGiftItem(${gi},${ii})">${SVG_EDIT}</button><button class="icon-btn del" onclick="deleteGiftItem(${gi},${ii})">${SVG_TRASH_SM}</button></div>`).join('')}<div class="gift-add-row"><input class="cl-add-input" id="gift-inp-${gi}" type="text" placeholder="新增禮物…" onkeydown="if(event.key==='Enter')addGiftItem(${gi})"><button class="cl-add-btn" style="width:38px;padding:0;flex-shrink:0" onclick="addGiftItem(${gi})">＋</button></div></div>`).join('');
 }
 function addGiftPerson(){const name=document.getElementById('gift-person-name').value.trim();if(!name)return;listData[curListTrip].gifts.push({name,items:[]});document.getElementById('gift-person-name').value='';renderGiftList();closeSheet('giftPersonSheet');save()}
 function addGiftItem(gi){const inp=document.getElementById('gift-inp-'+gi);const name=inp.value.trim();if(!name)return;listData[curListTrip].gifts[gi].items.push({name,done:false});inp.value='';renderGiftList();save()}

@@ -785,6 +785,12 @@ function loadAll(){
     if(d.archivedTrips)archivedTrips.push.apply(archivedTrips,d.archivedTrips);
     if(d.archivedIds)d.archivedIds.forEach(function(id){archivedListIds.add(id)});
     if(d.ccIdx!=null)ccIdx=d.ccIdx;
+    /* ── 關鍵修正：讀取後重算最大 id，確保不碰撞 ── */
+    var maxId=100;
+    Object.values(expenseData).forEach(function(arr){
+      (arr||[]).forEach(function(e){if(e.id>maxId)maxId=e.id});
+    });
+    expenseIdSeq=maxId;
     document.getElementById('home-trip-list').innerHTML='';
     (d.tripCards||[]).forEach(function(tc){buildHomeCard(tc)});
     return true;
@@ -1188,8 +1194,13 @@ function renderBudgetContent(){
     var legend=sortedCats.slice(0,5).map(function(pair){var ci=catInfo(pair[0]);return'<div class="cat-row"><div class="cat-dot" style="background:'+ci.color+'"></div><span class="cat-name">'+ci.icon+' '+pair[0]+'</span><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:'+Math.round(pair[1]/maxCat*100)+'%;background:'+ci.color+'"></div></div><span class="cat-amt">'+sym+numFmt(pair[1])+'</span></div>'}).join('');
     chartCard='<div class="chart-card"><div class="detail-section-title" style="margin-bottom:12px">分類統計</div><div class="chart-wrap"><div class="pie-wrap">'+pie+'<div class="pie-center"><div class="pie-center-amt">'+sortedCats.length+'</div><div class="pie-center-label">分類</div></div></div><div class="cat-legend">'+legend+'</div></div></div>';
   }
-  var dates=Array.from(new Set(exps.map(function(e){return e.date}))).sort();
-  if(!curBudgetDate&&dates.length)curBudgetDate=dates[dates.length-1];
+  /* 日期清單：去重 + 強制字串排序（YYYY-MM-DD 可直接比較） */
+  var dateSet={};
+  exps.forEach(function(e){if(e.date)dateSet[e.date]=true});
+  var dates=Object.keys(dateSet).sort();
+  /* 若 curBudgetDate 已不在清單裡，重設為最後一天 */
+  if(!curBudgetDate||dates.indexOf(curBudgetDate)<0)
+    curBudgetDate=dates.length?dates[dates.length-1]:null;
   var dateTabs='';
   if(dates.length){
     dateTabs='<div class="budget-day-tabs" id="budget-day-tabs">';
@@ -1203,11 +1214,31 @@ function renderBudgetContent(){
 function renderBudgetDayList(){
   var el=document.getElementById('budget-day-list');if(!el)return;
   var id=curBudgetTrip;
-  var exps=(expenseData[id]||[]).filter(function(e){return e.date===curBudgetDate});
+  /* 用 === 精準比對日期字串，避免型別轉換問題 */
+  var allExps=expenseData[id]||[];
+  var exps=allExps.filter(function(e){return e.date===curBudgetDate});
   var sym=tripBudget[id]?tripBudget[id].replace(/[\d,]/g,'').trim():'฿';
-  if(!curBudgetDate||!exps.length){el.innerHTML='<div style="padding:20px 0;text-align:center"><div style="font-size:28px;margin-bottom:8px">💸</div><div style="font-family:var(--sans);font-size:12px;color:var(--gray)">這天還沒有支出</div><div style="font-family:var(--sans);font-size:11px;color:rgba(120,90,50,.5);margin-top:4px">點右下角 ＋ 新增</div></div>';return}
+  if(!curBudgetDate||!exps.length){
+    el.innerHTML='<div style="padding:20px 0;text-align:center"><div style="font-size:28px;margin-bottom:8px">💸</div><div style="font-family:var(--sans);font-size:12px;color:var(--gray)">這天還沒有支出</div><div style="font-family:var(--sans);font-size:11px;color:rgba(120,90,50,.5);margin-top:4px">點右下角 ＋ 新增</div></div>';
+    return;
+  }
   var dayTotal=exps.reduce(function(s,e){return s+e.amt},0);
-  var html=exps.map(function(e){var ci=catInfo(e.cat);return'<div class="expense-item"><div class="expense-cat-icon" style="background:'+ci.color+'22">'+ci.icon+'</div><div class="expense-mid"><div class="expense-name">'+e.name+'</div><div class="expense-meta"><span class="expense-pay-badge">'+e.pay+'</span>'+(e.note?'<span class="expense-sub">'+e.note+'</span>':'')+'</div></div><div style="display:flex;align-items:center;gap:4px"><span class="expense-amt">'+sym+numFmt(e.amt)+'</span><button class="icon-btn" onclick="openEditExpense(\''+id+'\','+e.id+')">'+SVG_EDIT+'</button><button class="icon-btn del" onclick="deleteExpense(\''+id+'\','+e.id+')">'+SVG_TRASH_SM+'</button></div></div>'}).join('');
+  /* 用每筆的唯一 id 帶進 onclick，不依賴 index */
+  var html=exps.map(function(e){
+    var ci=catInfo(e.cat);
+    return'<div class="expense-item">'
+      +'<div class="expense-cat-icon" style="background:'+ci.color+'22">'+ci.icon+'</div>'
+      +'<div class="expense-mid">'
+      +'<div class="expense-name">'+e.name+'</div>'
+      +'<div class="expense-meta"><span class="expense-pay-badge">'+e.pay+'</span>'+(e.note?'<span class="expense-sub">'+e.note+'</span>':'')+'</div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:4px">'
+      +'<span class="expense-amt">'+sym+numFmt(e.amt)+'</span>'
+      +'<button class="icon-btn" onclick="openEditExpense(\''+id+'\','+e.id+')">'+SVG_EDIT+'</button>'
+      +'<button class="icon-btn del" onclick="deleteExpense(\''+id+'\','+e.id+')">'+SVG_TRASH_SM+'</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
   html+='<div class="expense-day-total-row"><span class="expense-day-total-label">當日合計</span><span class="expense-day-total-amt">'+sym+numFmt(dayTotal)+'</span></div>';
   el.innerHTML=html;
 }

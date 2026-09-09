@@ -414,6 +414,7 @@ input[type="date"]:focus{border-color:var(--orange)}
           <div class="card-body"><div class="card-date" id="date-vn">📅 2025年9月（規劃中）</div><div class="card-desc" id="desc-vn">越南河內 ＆ 下龍灣探索</div><div class="progress-row" style="margin-top:8px"><div class="progress-bar"><div class="progress-fill cc1" id="prog-vn" style="width:0%"></div></div><div class="progress-pct cc1" id="pct-vn">0%</div></div><div class="card-actions"><button class="btn btn-cc1" onclick="goDetail('vn')">📋 查看行程</button><button class="btn btn-secondary" onclick="goBudget('vn')">💰 記帳</button></div></div></div>
         </div>
       </div>
+      <button onclick="openSheet('backupSheet')" style="width:100%;height:40px;border:none;border-radius:12px;background:rgba(255,255,255,.18);font-family:var(--sans);font-size:12px;font-weight:700;color:rgba(120,70,30,.4);cursor:pointer;backdrop-filter:blur(6px);outline:1px solid rgba(160,110,40,.12);outline-offset:-3px;margin-bottom:10px">💾 備份 / 還原資料</button>
       <button class="add-trip-btn" id="add-trip-btn"><span style="font-size:20px">+</span> 新增旅程</button>
     </div>
   </div>
@@ -465,7 +466,7 @@ input[type="date"]:focus{border-color:var(--orange)}
       <div class="detail-card">
         <div id="detail-trip-name" class="detail-trip-name" contenteditable="true" spellcheck="false"></div>
         <div class="progress-row" style="margin-top:8px"><div class="progress-bar"><div class="progress-fill" id="detail-prog" style="width:0%"></div></div><div class="progress-pct" id="detail-pct">0%</div></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" onclick="openEditInfo()">✏️ 編輯資訊</button><button class="btn btn-secondary btn-sm" onclick="openSheet('archiveSheet')">📦 歸檔</button><button class="btn btn-secondary btn-sm" id="share-btn">📤 分享</button></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between"><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" onclick="openEditInfo()">✏️ 編輯資訊</button><button class="btn btn-secondary btn-sm" onclick="openSheet('archiveSheet')">📦 歸檔</button><button class="btn btn-secondary btn-sm" id="share-btn">📤 分享</button></div><span style="font-family:var(--en);font-size:10px;color:rgba(140,90,40,.35)">v<span id="ver-display"></span></span></div>
       </div>
       <div class="detail-card">
         <div class="detail-section-title">💰 預算概覽<button class="btn btn-secondary btn-sm" onclick="openSheet('budgetOverlay')">編輯</button></div>
@@ -646,7 +647,21 @@ input[type="date"]:focus{border-color:var(--orange)}
     <div class="ebtns" style="margin-top:16px"><button class="btn btn-primary" style="height:44px;font-size:14px" onclick="executeCopy()">確認複製</button><button class="btn btn-secondary" style="height:44px;font-size:14px;flex:none;padding:0 20px" onclick="closeSheet('copySheet')">取消</button></div>
   </div>
 </div>
-<div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src="" alt=""></div>
+<!-- 備份 Sheet -->
+<div class="edit-overlay" id="backupSheet" onclick="closeSheet('backupSheet',event)">
+  <div class="edit-sheet"><div class="sh"></div><button class="sc" onclick="closeSheet('backupSheet')">✕</button>
+    <div class="st">💾 備份 / 還原資料</div>
+    <p style="font-family:var(--sans);font-size:12px;color:var(--gray);line-height:1.7;margin-bottom:16px">匯出會下載一個 <code>.json</code> 檔案，儲存你所有行程、記帳、清單資料。還原時選取該檔案即可無縫恢復。</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" style="height:44px;font-size:14px" onclick="exportBackup()">📤 匯出備份檔案</button>
+      <label class="btn btn-secondary" style="height:44px;font-size:14px;cursor:pointer">
+        📥 匯入備份檔案
+        <input type="file" accept=".json" style="display:none" onchange="importBackup(event)">
+      </label>
+    </div>
+    <p style="font-family:var(--sans);font-size:11px;color:rgba(180,90,40,.5);margin-top:14px;line-height:1.6">⚠️ 匯入會覆蓋目前所有資料，請確認已先匯出備份。</p>
+  </div>
+</div>
 
 <script>
 var SVG_EDIT='<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="#7a6a5a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5l2 2L5 11H3v-2l6.5-6.5z"/></svg>';
@@ -754,6 +769,9 @@ function fmtShort(s){if(!s)return'';var d=new Date(s+'T00:00:00');return(d.getMo
 function fmtShortNw(s){if(!s)return'';var d=new Date(s+'T00:00:00');return(d.getMonth()+1)+'/'+d.getDate()}
 function diffDays(a,b){return Math.max(0,Math.round((new Date(b)-new Date(a))/86400000))}
 function numFmt(n){return Math.round(n).toLocaleString()}
+
+/* ── 版本號（每次更新改這裡）── */
+var APP_VERSION='2.1.0';
 
 /* ── localStorage ── */
 var LS_KEY='wanderplan_v1';
@@ -1580,6 +1598,84 @@ function ntCreateTrip(){
 }
 
 document.getElementById('add-trip-btn').addEventListener('click',openNewTripSheet);
+
+/* ── 版本顯示 ── */
+(function(){var el=document.getElementById('ver-display');if(el)el.textContent=APP_VERSION})();
+
+/* ── 備份匯出 ── */
+function exportBackup(){
+  var ids=getAllTripIds();
+  var payload={
+    _version:APP_VERSION,
+    _exported:new Date().toISOString(),
+    ccMap:ccMap,imgMap:imgMap,
+    tripBudget:tripBudget,tripCurrency:tripCurrency,tripBudgetRaw:tripBudgetRaw,
+    tripDates:tripDates,flightData:flightData,hostelData:hostelData,
+    dayData:dayData,listData:listData,expenseData:expenseData,
+    archivedTrips:archivedTrips,archivedIds:Array.from(archivedListIds),
+    ccIdx:ccIdx,
+    tripCards:ids.map(function(id){return{
+      id:id,
+      city:document.getElementById('city-'+id)?document.getElementById('city-'+id).textContent:'',
+      country:document.getElementById('country-'+id)?document.getElementById('country-'+id).textContent:'',
+      date:document.getElementById('date-'+id)?document.getElementById('date-'+id).textContent:'',
+      desc:document.getElementById('desc-'+id)?document.getElementById('desc-'+id).textContent:'',
+      cc:ccMap[id]||'cc0'
+    }})
+  };
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='WanderPlan_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+/* ── 備份匯入 ── */
+function importBackup(event){
+  var file=event.target.files[0];if(!file)return;
+  if(!confirm('確定要匯入備份嗎？這會覆蓋目前所有資料！'))return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var d=JSON.parse(e.target.result);
+      /* 清空現有資料 */
+      Object.keys(ccMap).forEach(function(k){delete ccMap[k]});
+      Object.keys(imgMap).forEach(function(k){delete imgMap[k]});
+      Object.keys(tripBudget).forEach(function(k){delete tripBudget[k]});
+      Object.keys(tripCurrency).forEach(function(k){delete tripCurrency[k]});
+      Object.keys(tripBudgetRaw).forEach(function(k){delete tripBudgetRaw[k]});
+      Object.keys(tripDates).forEach(function(k){delete tripDates[k]});
+      Object.keys(flightData).forEach(function(k){delete flightData[k]});
+      Object.keys(hostelData).forEach(function(k){delete hostelData[k]});
+      Object.keys(dayData).forEach(function(k){delete dayData[k]});
+      Object.keys(listData).forEach(function(k){delete listData[k]});
+      Object.keys(expenseData).forEach(function(k){delete expenseData[k]});
+      archivedTrips.length=0;archivedListIds.clear();
+      /* 填入備份資料 */
+      Object.assign(ccMap,d.ccMap||{});Object.assign(imgMap,d.imgMap||{});
+      Object.assign(tripBudget,d.tripBudget||{});Object.assign(tripCurrency,d.tripCurrency||{});
+      Object.assign(tripBudgetRaw,d.tripBudgetRaw||{});Object.assign(tripDates,d.tripDates||{});
+      Object.assign(flightData,d.flightData||{});Object.assign(hostelData,d.hostelData||{});
+      Object.assign(dayData,d.dayData||{});Object.assign(listData,d.listData||{});
+      Object.assign(expenseData,d.expenseData||{});
+      if(d.archivedTrips)archivedTrips.push.apply(archivedTrips,d.archivedTrips);
+      if(d.archivedIds)d.archivedIds.forEach(function(id){archivedListIds.add(id)});
+      if(d.ccIdx!=null)ccIdx=d.ccIdx;
+      /* 重算 expenseIdSeq */
+      var maxId=100;
+      Object.values(expenseData).forEach(function(arr){(arr||[]).forEach(function(e){if(e.id>maxId)maxId=e.id})});
+      expenseIdSeq=maxId;
+      /* 重建 DOM */
+      document.getElementById('home-trip-list').innerHTML='';
+      (d.tripCards||[]).forEach(function(tc){buildHomeCard(tc)});
+      saveAll();
+      closeSheet('backupSheet');
+      alert('✅ 備份匯入成功！共 '+(d.tripCards||[]).length+' 個行程。');
+      showPage('page-home');
+    }catch(err){alert('❌ 匯入失敗，請確認檔案格式正確。\n'+err.message)}
+  };
+  reader.readAsText(file);
+}
 </script>
 </body>
 </html>

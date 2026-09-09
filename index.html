@@ -658,6 +658,7 @@ input[type="date"]:focus{border-color:var(--orange)}
         📥 匯入備份檔案
         <input type="file" accept=".json" style="display:none" onchange="importBackup(event)">
       </label>
+      <button class="btn btn-secondary" style="height:44px;font-size:14px;border-color:rgba(255,91,91,.3);color:#cc4444" onclick="fixExpenseIds()">🔧 修復記帳 ID 碰撞問題</button>
     </div>
     <p style="font-family:var(--sans);font-size:11px;color:rgba(180,90,40,.5);margin-top:14px;line-height:1.6">⚠️ 匯入會覆蓋目前所有資料，請確認已先匯出備份。</p>
   </div>
@@ -1601,6 +1602,23 @@ document.getElementById('add-trip-btn').addEventListener('click',openNewTripShee
 
 /* ── 版本顯示 ── */
 (function(){var el=document.getElementById('ver-display');if(el)el.textContent=APP_VERSION})();
+
+/* ── 修復記帳 ID 碰撞 ── */
+function fixExpenseIds(){
+  if(!confirm('這會重新編排所有記帳項目的 ID，修復編輯/刪除錯亂的問題。\n建議先匯出備份後再執行。\n\n確定繼續嗎？'))return;
+  var counter=1;
+  Object.keys(expenseData).forEach(function(tripId){
+    var arr=expenseData[tripId]||[];
+    /* 先按日期排序，讓 id 順序跟日期一致 */
+    arr.sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0});
+    arr.forEach(function(e){e.id=counter++});
+  });
+  expenseIdSeq=counter;
+  saveAll();
+  alert('✅ 修復完成！共重新編號 '+(counter-1)+' 筆記帳資料。\n請重新開啟記帳頁面確認是否正常。');
+  closeSheet('backupSheet');
+  renderBudgetPage();
+}
 
 /* ── 備份匯出 ── */
 function exportBackup(){
